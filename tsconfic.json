@@ -1,0 +1,11 @@
+{
+    "compileerOptions" :{
+        "target":"ES6",
+        "module": "ES2022",
+        "strict": "true",
+        "outDir": "./out"
+    },
+    "include":[
+        "./src/**/*.ts"
+    ]
+}
