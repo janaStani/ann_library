@@ -43,10 +43,11 @@ const points: Point[] = [];
 for(let i = 0 ; i < count; i++){
     const x = Math.random();
     const y = Math.random();
+    let label = 1;
     if(x < y){
-        let label = -1;
-    
-    points.push(new Point(x,y,label));
+        label = -1;
     }
+    points.push(new Point(x,y,label));
 }
+return points
 }

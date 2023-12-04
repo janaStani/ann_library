@@ -17,7 +17,7 @@ export function initGfx() {
 function draw() {
     //clear scr
     const ctx = getContext();
-    ctx.fillStyle = 'black';
+    ctx.fillStyle = 'white';
     ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     for (const dr of drawables) {
         dr.draw(ctx, CANVAS_WIDTH, CANVAS_HEIGHT);
