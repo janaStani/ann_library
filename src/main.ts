@@ -17,21 +17,25 @@ async function main(){
         new Layer(2,ActivationFunction.sigmoid),
     ]);
 
-    for(let i = 0; i < points.length; i++){
-        const inputVector = [points[i].x, points[i].y];
-        //one hot encoding
-        const targets = [0,0];
-        targets[points[i].label] = 1;
-        
-        model.fitOne(inputVector, targets);
+    const epochs = 10;
+    for(let e = 0; e < epochs; e++){
+        console.log("Epoch: ", e)
 
-        if (i % 25 == 0){
-            predictAll(model, points);
+        for(let i = 0; i < points.length; i++){
+            const inputVector = [points[i].x, points[i].y];
+            //one hot encoding
+            const targets = [0,0];
+            targets[points[i].label] = 1;
+            
+            model.fitOne(inputVector, targets);
+    
+            if (i % 25 == 0){
+                predictAll(model, points);
+            }
+    
+            await sleep(1);
         }
-
-        await sleep(1);
     }
-  
 }
 
 function predictAll(model: ArtificialNeuralNetwork, data: Point[]){

@@ -22,16 +22,20 @@ function main() {
             new Layer(50, ActivationFunction.sigmoid),
             new Layer(2, ActivationFunction.sigmoid),
         ]);
-        for (let i = 0; i < points.length; i++) {
-            const inputVector = [points[i].x, points[i].y];
-            //one hot encoding
-            const targets = [0, 0];
-            targets[points[i].label] = 1;
-            model.fitOne(inputVector, targets);
-            if (i % 25 == 0) {
-                predictAll(model, points);
+        const epochs = 10;
+        for (let e = 0; e < epochs; e++) {
+            console.log("Epoch: ", e);
+            for (let i = 0; i < points.length; i++) {
+                const inputVector = [points[i].x, points[i].y];
+                //one hot encoding
+                const targets = [0, 0];
+                targets[points[i].label] = 1;
+                model.fitOne(inputVector, targets);
+                if (i % 25 == 0) {
+                    predictAll(model, points);
+                }
+                yield sleep(1);
             }
-            yield sleep(1);
         }
     });
 }

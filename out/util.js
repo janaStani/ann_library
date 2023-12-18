@@ -9,7 +9,7 @@ export class DerivativeFunction {
 }
 DerivativeFunction.sigmoid = (m) => {
     const sig = ActivationFunction.sigmoid(m);
-    const one = oneMatrix(m.getRows(), m.getCols());
+    const one = oneMatrix(m.getCols(), m.getRows());
     const oneMinusSig = subtractMatrices(one, sig);
     return multiplyByElement(sig, oneMinusSig);
 };
