@@ -24,6 +24,12 @@ async function main(){
         targets[points[i].label] = 1;
         
         model.fitOne(inputVector, targets);
+
+        if (i % 25 == 0){
+            predictAll(model, points);
+        }
+
+        await sleep(1);
     }
   
 }
