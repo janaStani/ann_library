@@ -1,4 +1,5 @@
-import { Matrix, addMatrices, multiply, randomMatrix, transpose } from "./matrix.js";
+import { Matrix, addMatrices, multiply, multiplyByElement, multiplyScalar, randomMatrix, subtractMatrices, transpose } from "./matrix.js";
+import { getDerivative } from "./util.js";
 
 export class Layer{
     private layerSize: number;
@@ -6,6 +7,9 @@ export class Layer{
     
     private weights: Matrix | undefined; 
     private biases: Matrix | undefined; 
+
+    private lastInput: Matrix | undefined;
+    private lastOutput: Matrix | undefined;
 
     constructor(layerSize: number, activation: (m: Matrix) => Matrix){
         this.layerSize = layerSize;
@@ -22,10 +26,44 @@ export class Layer{
         if(!this.weights || !this.biases){
             throw new Error("Weights or biases not initialized");
         }
+        this.lastInput = input;
+
         const mult = multiply(this.weights,input);
         const weightesSum = addMatrices(mult,this.biases);
-        return this.activationFunction(weightesSum);
 
+        this.lastOutput = weightesSum;
+
+        return this.activationFunction(weightesSum);
+    }
+
+    public backPropagation(outErrors:Matrix, lr: number):Matrix{
+        if(!this.weights || !this.biases){
+            throw new Error("Weights or biases not initialized");
+        }
+        if(!this.lastInput || !this.lastOutput){
+            throw new Error("Inputs and outputs not stored");
+        }
+
+        //clc errors of prev layer
+        const transposedWeights = transpose(this.weights);
+        const prevLayerErrors = multiply(transposedWeights, outErrors);
+
+        //calc gradient
+        const derivative = getDerivative(this.activationFunction);
+        const outGradient = derivative(this.lastOutput);
+        const gradient = multiplyByElement(outGradient, outErrors);
+
+        //bias deltas - changes
+        const biasDeltas = multiplyScalar(gradient, lr);
+        this.biases = addMatrices(this.biases, biasDeltas);
+
+        //weights deltas - changes
+        const inputsTransposed = transpose(this.lastInput);
+        const weightsDeltas = multiply(biasDeltas, inputsTransposed);
+        this.weights = addMatrices(this.weights, weightsDeltas);
+        
+
+        return prevLayerErrors;
     }
 }
 
@@ -51,5 +89,17 @@ export class ArtificialNeuralNetwork{
             inputVector = layer.feedForward(inputVector);
         }
         return transpose(inputVector).getValues()[0];
+    }
+
+    public fitOne(inputs: number[], targets: number[]){
+        const predictions = this.predOne(inputs);
+        const predictionMatrix = new Matrix([predictions]);
+        const targetMatrix = new Matrix([targets]);
+
+        let errors = transpose(subtractMatrices(targetMatrix, predictionMatrix));
+
+        for(let i = this.layers.length-1; i >= 0; i--){
+            errors = this.layers[i].backPropagation(errors, this.learningRate);
+        }
     }
 }
