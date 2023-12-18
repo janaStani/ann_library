@@ -18,10 +18,9 @@ function main() {
         console.table(points);
         setDrawables(points);
         const model = new ArtificialNeuralNetwork(2, 0.03, [
-            new Layer(10, ActivationFunction.sigmoid),
-            new Layer(5, ActivationFunction.sigmoid),
-            new Layer(15, ActivationFunction.sigmoid),
-            new Layer(3, ActivationFunction.sigmoid),
+            new Layer(50, ActivationFunction.sigmoid),
+            new Layer(50, ActivationFunction.sigmoid),
+            new Layer(2, ActivationFunction.sigmoid),
         ]);
         const inputVector = [points[0].x, points[0].y];
         console.log(model.predOne(inputVector));
