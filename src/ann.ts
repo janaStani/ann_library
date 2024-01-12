@@ -33,7 +33,7 @@ export class Layer{
 
         this.lastOutput = weightesSum;
 
-        return this.activationFunction(weightesSum);
+        return this.lastOutput;
     }
 
     public backPropagation(outErrors:Matrix, lr: number):Matrix{

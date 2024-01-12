@@ -3,39 +3,96 @@ import { initGfx, setDrawables } from "./gfx.js";
 import { Point } from "./data.js";
 import { ArtificialNeuralNetwork, Layer } from "./ann.js";
 import { ActivationFunction } from "./util.js";
+import { getDataset } from "./mnist_handwritten.js";
+
+type MnistDigit = {
+    image: number[],
+    label: number
+}
 
 async function main(){
-    initGfx();
-    const points = generatePoints(500);
-    console.table(points)
-    setDrawables(points);
+    
+    console.log("loading data...")
+    const dataset = getDataset() as MnistDigit[];
+    const[train,test] = splitDataset(dataset)
 
 
-    const model = new ArtificialNeuralNetwork(2,0.03,[
-        new Layer(50,ActivationFunction.sigmoid),
-        new Layer(50,ActivationFunction.sigmoid),
+    
+
+    const model = new ArtificialNeuralNetwork(784,0.0001,[
+        new Layer(128,ActivationFunction.relu),
+        new Layer(64,ActivationFunction.relu),
         new Layer(2,ActivationFunction.sigmoid),
-    ]);
+    ]); //[0.1, 0.3]
 
-    const epochs = 10;
-    for(let e = 0; e < epochs; e++){
-        console.log("Epoch: ", e)
+    console.log("Training: "+train.length);
+    let count = 0;
+    let progress = 0;
+    const percent = train.length * 0.01;
 
-        for(let i = 0; i < points.length; i++){
-            const inputVector = [points[i].x, points[i].y];
-            //one hot encoding
-            const targets = [0,0];
-            targets[points[i].label] = 1;
-            
-            model.fitOne(inputVector, targets);
-    
-            if (i % 25 == 0){
-                predictAll(model, points);
-            }
-    
-            await sleep(1);
+
+    for(let i = 0; i< train.length;i++){
+        const digit = train[i];
+
+        const inputVector = digit.image;
+        const outputVector = [0,0];
+        outputVector[digit.label] = 1; //set the corr answ
+
+        model.fitOne(inputVector, outputVector);
+
+        //log progress
+
+        if (count > percent){
+            count = 0;
+            progress++;
+            console.log(progress + "%")
         }
+        count++;
     }
+
+    
+    testModel(model,test);
+}
+
+function testModel(model: ArtificialNeuralNetwork, data: MnistDigit[]){
+    console.log("Test:"+data.length+"**************")
+    console.time("test")
+
+
+    let correct = 0
+    let confusionMatrix = [
+        [0,0],
+        [0,0]
+    ];
+
+    for (const digit of data){
+        const predictionVector = model.predOne(digit.image);
+        //[0.1, 0.8] => 1
+        //[0.9, 0.3] => 0
+        const pred = argMax(predictionVector)
+
+        if (pred == digit.label){
+            correct++;
+        }
+
+        confusionMatrix[digit.label][pred]++;
+    }
+
+    const accuracy = Math.round(correct/data.length*100)
+    console.log("Accuracy"+accuracy+"%")
+    console.table(confusionMatrix);
+    console.timeEnd("test")
+    console.log("Test end")
+}
+
+function splitDataset(data: MnistDigit[]):[MnistDigit[],MnistDigit[]]{
+    const shuffled = data.sort(() => 0.5 - Math.random());
+    const splitPoint = Math.floor(shuffled.length * 0.8);
+
+    const train = shuffled.slice(0,splitPoint);
+    const test = shuffled.slice(splitPoint);
+    
+    return[train,test];
 }
 
 function predictAll(model: ArtificialNeuralNetwork, data: Point[]){

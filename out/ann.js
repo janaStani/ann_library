@@ -18,7 +18,7 @@ export class Layer {
         const mult = multiply(this.weights, input);
         const weightesSum = addMatrices(mult, this.biases);
         this.lastOutput = weightesSum;
-        return this.activationFunction(weightesSum);
+        return this.lastOutput;
     }
     backPropagation(outErrors, lr) {
         if (!this.weights || !this.biases) {
